@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="mystyle.css">
+<script>
+   function doStuff(){
+           
+            var n = document.getElementById("iname").value;
+	    console.log(n);
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+                if(this.readyState == 4 && this.status == 200){
+                    var auxList = this.responseText.split(';');
+                    recipeList = auxList.slice(0,auxList.length-1);
+
+		    var text = "";
+                    for(var i = 0; i<recipeList.length; i++){
+                        var elems = recipeList[i].split('~');
+                        text += "<div class='card' onclick='displayReviews(" + elems[4] + ")'>";
+			text += "<h2>" + elems[0] + "</h2>";
+			text += "<h5>" + elems[3] + " minutes to complete</h5>";
+			text += "<p>You will need the following ingredients:" + elems[1] + "</p>";
+			text += "<p>" + elems[2] + "</p>";
+			text += "</div>";
+                        
+                    }
+                    document.getElementById('leftcolumn').innerHTML = text;
+                }
+            }
+            xmlhttp.open("GET","recipes2.php?ingredients="+n);
+            xmlhttp.send();
+   }
+
+	function displayReviews(x){
+
+            console.log(x);
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+                if(this.readyState == 4 && this.status == 200){
+                    var auxList = this.responseText.split(';');
+                    recipeList = auxList.slice(0,auxList.length-1);
+
+                    var text = "";
+			text += "<form method='GET' action='addreview.php'>";
+		        text+= "Leave us a review:\n";
+			text+= "<input type='hidden' name='ridID' value='" + x + "'><br>";
+			text+="Display nickname: <input type='text' name='nickname'><br>";
+			text += "Review: <input type='text' name='review'><br>";
+			text += "<input type='Submit' value='Submit review'>";
+		    text += "</form>";
+                    for(var i = 0; i<recipeList.length; i++){
+                        text += "<div class='card'>";
+                        var elems = recipeList[i].split('~');
+                        console.log(elems[0]);
+			console.log(elems[1]);
+                        text += "<h2>User " + elems[0] + " says:</h2>";
+                        text += "<p>" + elems[1] + "</p>";
+                        text += "</div>";
+
+                    }
+                    document.getElementById('rightcolumn').innerHTML = text;
+                }
+            }
+
+		xmlhttp.open("GET","reviews.php?rid="+x);
+            	xmlhttp.send();
+
+
+	}
+	function loadDataa(){
+		var txtFile = new XMLHttpRequest();
+		console.log('hi');
+        	txtFile.open("GET","weekly_statistics2.txt",true);
+        	txtFile.onreadystatechange = function() {
+        	if(txtFile.readyState ===4 && (txtFile.status === 200 || txtFile.status == 0)){
+              		var allText = txtFile.responseText;
+			document.getElementById('footer').innerHTML="Our most popular recipe is "  + allText;
+
+			console.log(allText);
+               	}
+        	}
+		txtFile.send(null);
+	
+	}
+				      loadDataa();
+</script>
+</head>
+<body>
+
+<div class="header">
+  <h1>Recipe finder</h1>
+  <p>For the cook within all of us.</p>
+</div>
+
+<div class="topnav">
+  <a href="http://localhost/final2.html">Search by ingredient</a>
+  <a href="http://localhost/final.html">Subscribe to a daily recipe</a>
+</div>
+<div>
+    <form>
+      <label for="iname">Ingredient list</label>
+      <input type="text" id="iname" name="iname" placeholder="Your ingredients..">
+      <button type="button" id="button" onclick="doStuff()">Search</button>
+    </form>
+</div>
+<div class="row">
+  <div class="leftcolumn" id="leftcolumn">
+  </div>
+  <div class="rightcolumn" id="rightcolumn">
+  </div>
+</div>
+<div class="footer" id="footer" onclick='loadDataa()'>
+
+</div>
+
+</body>
+</html>
